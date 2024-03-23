@@ -3,14 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Converter</title>
-    <link rel="stylesheet" href="style.css">
+    <title>WebP to JPEG Converter</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
 </head>
 <body>
-    <div id="upload-container">
-        <input type="file" id="image-input" accept="image/webp"/>
-        <button id="upload-button">Upload and Convert</button>
-    </div>
-    <script src="script.js"></script>
+
+<py-env>
+- pillow
+</py-env>
+
+<h1>WebP to JPEG Converter</h1>
+
+<input type="file" id="upload-file" accept=".webp"/>
+<button onclick="convertToJPEG()">Upload WebP File</button>
+
+<img id="output-image" src="" alt="Converted Image" style="max-width: 300px; display: none;"/>
+
+<py-script>
+from PIL import Image
+from js import document
+from io import BytesIO
+import base64
+
+def convert_to_jpeg(webp_data):
+    webp_image = Image.open(BytesIO(webp_data))
+    jpeg_image_bytes = BytesIO()
+    webp_image.save(jpeg_image_bytes, format='JPEG')
+    jpeg_base64 = base64.b64encode(jpeg_image_bytes.getvalue()).decode('utf-8')
+    return jpeg_base64
+
+def file_to_bytes(file):
+    return file.arrayBuffer().to_py()
+
+async def convertToJPEG():
+    file_input = document.getElementById('upload-file')
+    if file_input.files.length == 0:
+        return
+    file = file_input.files[0]
+    file_bytes = await file_to_bytes(file)
+    jpeg_base64 = convert_to_jpeg(file_bytes)
+    output_img = document.getElementById('output-image')
+    output_img.src = f"data:image/jpeg;base64,{jpeg_base64}"
+    output_img.style.display = 'block'
+</py-script>
+
 </body>
 </html>
