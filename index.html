@@ -12,23 +12,23 @@
 <h1>WebP to JPEG Converter</h1>
 
 <input type="file" id="upload-file" accept=".webp"/>
-<button onclick="convertToJPEG()">Upload WebP File</button>
+<button id="upload-button">Upload WebP File</button>
 
 <img id="output-image" src="" alt="Converted Image" style="display: none; max-width: 300px;"/>
 
 <py-script>
-from pyodide import create_proxy
+from asyncio import ensure_future
 from PIL import Image
-from js import document, fetch
+from js import document, fetch, window
 from io import BytesIO
 import base64
-import asyncio
+import micropip
 
 async def install_pillow():
-    import micropip
     await micropip.install('pillow')
 
 async def convert_to_jpeg(file):
+    await install_pillow()  # Ensure Pillow is installed inside the coroutine
     webp_image = Image.open(BytesIO(await file.arrayBuffer().to_py()))
     jpeg_image_bytes = BytesIO()
     webp_image.save(jpeg_image_bytes, format='JPEG')
@@ -36,16 +36,13 @@ async def convert_to_jpeg(file):
     document.getElementById('output-image').src = f"data:image/jpeg;base64,{jpeg_base64}"
     document.getElementById('output-image').style.display = 'block'
 
-async def handle_file_upload(event):
-    await install_pillow()  # Ensure Pillow is installed
+def on_upload_click(event):
     file_input = document.getElementById('upload-file')
     if file_input.files.length > 0:
         file = file_input.files[0]
-        await convert_to_jpeg(file)
+        ensure_future(convert_to_jpeg(file))
 
-# Create a Python proxy for the JavaScript function and assign it to the button's onclick event
-convertToJPEG = create_proxy(handle_file_upload)
-document.querySelector('button').onclick = convertToJPEG
+document.getElementById('upload-button').addEventListener('click', on_upload_click)
 </py-script>
 
 </body>
