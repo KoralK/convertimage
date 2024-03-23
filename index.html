@@ -9,10 +9,6 @@
 </head>
 <body>
 
-<py-env>
-- pillow
-</py-env>
-
 <h1>WebP to JPEG Converter</h1>
 
 <input type="file" id="upload-file" accept=".webp"/>
@@ -21,6 +17,9 @@
 <img id="output-image" src="" alt="Converted Image" style="max-width: 300px; display: none;"/>
 
 <py-script>
+import micropip
+await micropip.install('pillow')
+
 from PIL import Image
 from js import document
 from io import BytesIO
