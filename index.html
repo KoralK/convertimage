@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebP to JPEG Converter</title>
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
     <script defer src="https://pyscript.net/latest/pyscript.js"></script>
@@ -11,39 +10,38 @@
 
 <h1>WebP to JPEG Converter</h1>
 
-<input type="file" id="upload-file" accept=".webp"/>
-<button id="upload-button">Upload WebP File</button>
+<input type="file" id="upload-file" accept=".webp" onchange="convertImage()">
+<button id="convert-button">Convert to JPEG</button>
 
-<img id="output-image" src="" alt="Converted Image" style="display: none; max-width: 300px;"/>
+<img id="output-image" style="display:none; max-width: 300px;" alt="Converted Image">
 
 <py-script>
-from asyncio import ensure_future
+from js import document
 from PIL import Image
-from js import document, fetch, window
 from io import BytesIO
 import base64
-import micropip
-
-async def install_pillow():
-    await micropip.install('pillow')
+import asyncio
 
 async def convert_to_jpeg(file):
-    await install_pillow()  # Ensure Pillow is installed inside the coroutine
     webp_image = Image.open(BytesIO(await file.arrayBuffer().to_py()))
-    jpeg_image_bytes = BytesIO()
-    webp_image.save(jpeg_image_bytes, format='JPEG')
-    jpeg_base64 = base64.b64encode(jpeg_image_bytes.getvalue()).decode('utf-8')
-    document.getElementById('output-image').src = f"data:image/jpeg;base64,{jpeg_base64}"
-    document.getElementById('output-image').style.display = 'block'
+    jpeg_bytes = BytesIO()
+    webp_image.save(jpeg_bytes, format="JPEG")
+    jpeg_base64 = base64.b64encode(jpeg_bytes.getvalue()).decode('utf-8')
+    document.getElementById("output-image").src = f"data:image/jpeg;base64,{jpeg_base64}"
+    document.getElementById("output-image").style.display = "block"
 
-def on_upload_click(event):
-    file_input = document.getElementById('upload-file')
+def convertImage():
+    file_input = document.getElementById("upload-file")
     if file_input.files.length > 0:
         file = file_input.files[0]
-        ensure_future(convert_to_jpeg(file))
-
-document.getElementById('upload-button').addEventListener('click', on_upload_click)
+        asyncio.create_task(convert_to_jpeg(file))
 </py-script>
+
+<script>
+function convertImage() {
+    pyodide.runPython(`convertImage()`);
+}
+</script>
 
 </body>
 </html>
