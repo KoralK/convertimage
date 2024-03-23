@@ -2,28 +2,42 @@ document.getElementById('upload-button').addEventListener('click', function() {
     const imageInput = document.getElementById('image-input');
     if (imageInput.files.length > 0) {
         const file = imageInput.files[0];
-        // Generate a signed URL for secure upload. This URL should be obtained from your server.
-        // This part is pseudo-code and needs to be replaced with your actual implementation.
-        fetch('YOUR_ENDPOINT_TO_GET_SIGNED_URL', {
-            method: 'GET', // Or POST, depending on your endpoint
-            // Additional headers or body might be required depending on your implementation
+        const fileName = encodeURIComponent(file.name);
+        const bucketName = 'korals_kova'; // Replace with your actual bucket name
+
+        // Replace 'YOUR_ENDPOINT_TO_GET_SIGNED_URL' with your function's actual URL.
+        fetch('https://us-central1-vocal-park-418014.cloudfunctions.net/generate_signed_url', {
+            method: 'POST', // Use POST if your endpoint expects it
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                bucket: bucketName,
+                file: fileName,
+                contentType: file.type // Assuming your function uses this to set the Content-Type of the signed URL
+            })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok.');
+            }
+            return response.json();
+        })
         .then(data => {
             const signedUrl = data.signedUrl; // Assuming the response contains a signed URL
             // Now upload the file to the signed URL
             fetch(signedUrl, {
-                method: 'PUT',
+                method: 'PUT', // PUT method for uploading the file to the signed URL
                 headers: {
-                    'Content-Type': 'image/webp'
+                    'Content-Type': 'image/webp' // Set to the file's actual MIME type if different
                 },
                 body: file
             })
-            .then(response => {
-                if (response.ok) {
+            .then(uploadResponse => {
+                if (uploadResponse.ok) {
                     alert('Image uploaded and conversion triggered!');
                 } else {
-                    alert('Failed to upload image.');
+                    throw new Error('Upload failed.');
                 }
             });
         })
