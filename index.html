@@ -12,42 +12,40 @@
 <h1>WebP to JPEG Converter</h1>
 
 <input type="file" id="upload-file" accept=".webp"/>
-<button onclick="pyodide.runPythonAsync('ensure_future(convertToJPEG())')">Upload WebP File</button>
+<button onclick="convertToJPEG()">Upload WebP File</button>
 
-<img id="output-image" src="" alt="Converted Image" style="max-width: 300px; display: none;"/>
+<img id="output-image" src="" alt="Converted Image" style="display: none; max-width: 300px;"/>
 
 <py-script>
-import asyncio
-import micropip
-await micropip.install('pillow')
-
+from pyodide import create_proxy
 from PIL import Image
-from js import document
+from js import document, fetch
 from io import BytesIO
 import base64
+import asyncio
 
-def convert_to_jpeg(webp_data):
-    webp_image = Image.open(BytesIO(webp_data))
+async def install_pillow():
+    import micropip
+    await micropip.install('pillow')
+
+async def convert_to_jpeg(file):
+    webp_image = Image.open(BytesIO(await file.arrayBuffer().to_py()))
     jpeg_image_bytes = BytesIO()
     webp_image.save(jpeg_image_bytes, format='JPEG')
     jpeg_base64 = base64.b64encode(jpeg_image_bytes.getvalue()).decode('utf-8')
-    return jpeg_base64
+    document.getElementById('output-image').src = f"data:image/jpeg;base64,{jpeg_base64}"
+    document.getElementById('output-image').style.display = 'block'
 
-def file_to_bytes(file):
-    return file.arrayBuffer().to_py()
-
-async def convertToJPEG():
+async def handle_file_upload(event):
+    await install_pillow()  # Ensure Pillow is installed
     file_input = document.getElementById('upload-file')
-    if file_input.files.length == 0:
-        return
-    file = file_input.files[0]
-    file_bytes = await file_to_bytes(file)
-    jpeg_base64 = convert_to_jpeg(file_bytes)
-    output_img = document.getElementById('output-image')
-    output_img.src = f"data:image/jpeg;base64,{jpeg_base64}"
-    output_img.style.display = 'block'
+    if file_input.files.length > 0:
+        file = file_input.files[0]
+        await convert_to_jpeg(file)
 
-asyncio.ensure_future(convertToJPEG())
+# Create a Python proxy for the JavaScript function and assign it to the button's onclick event
+convertToJPEG = create_proxy(handle_file_upload)
+document.querySelector('button').onclick = convertToJPEG
 </py-script>
 
 </body>
