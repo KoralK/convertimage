@@ -12,11 +12,12 @@
 <h1>WebP to JPEG Converter</h1>
 
 <input type="file" id="upload-file" accept=".webp"/>
-<button onclick="convertToJPEG()">Upload WebP File</button>
+<button onclick="pyodide.runPythonAsync('ensure_future(convertToJPEG())')">Upload WebP File</button>
 
 <img id="output-image" src="" alt="Converted Image" style="max-width: 300px; display: none;"/>
 
 <py-script>
+import asyncio
 import micropip
 await micropip.install('pillow')
 
@@ -45,6 +46,8 @@ async def convertToJPEG():
     output_img = document.getElementById('output-image')
     output_img.src = f"data:image/jpeg;base64,{jpeg_base64}"
     output_img.style.display = 'block'
+
+asyncio.ensure_future(convertToJPEG())
 </py-script>
 
 </body>
