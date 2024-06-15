@@ -4,25 +4,28 @@
     <meta charset="UTF-8">
     <title>WebP to JPEG Converter</title>
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.2/full/pyodide.js"></script>
     <script type="text/javascript">
-        async function main() {
-            let pyodide = await loadPyodide();
+        window.addEventListener('load', async function() {
+            // Initialize Pyodide
+            window.pyodide = await loadPyodide({
+                indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.2/full/"
+            });
             console.log("Pyodide loaded successfully.");
+
+            // Load the Pillow package
             await pyodide.loadPackage(['pillow']);
             console.log("Pillow loaded successfully.");
-
-            // Your PyScript setup or other Python-invoking JavaScript can go here
-        }
-        window.addEventListener('load', main);
+        });
     </script>
 </head>
 <body>
     <h1>WebP to JPEG Converter</h1>
+
     <input type="file" id="upload-file" accept=".webp" onchange="convertImage()">
     <button id="convert-button">Convert to JPEG</button>
     <img id="output-image" style="display:none; max-width: 300px;" alt="Converted Image">
-    
+
     <py-script>
         from js import document
         from PIL import Image
@@ -46,9 +49,9 @@
     </py-script>
 
     <script>
-    function convertImage() {
-        pyodide.runPython(`convertImage()`);
-    }
+        function convertImage() {
+            window.pyodide.runPython('convertImage()');
+        }
     </script>
 </body>
 </html>
