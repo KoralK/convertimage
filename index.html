@@ -16,7 +16,7 @@
                 console.log("Pyodide loaded successfully.");
 
                 // Then load the Pillow package
-                await pyodide.loadPackage(['pillow']);
+                await Pyodide.loadPackage(['pillow']);
                 console.log("Pillow loaded successfully.");
 
                 // Finally, load PyScript
@@ -59,7 +59,7 @@
 
     <script>
     function convertImage() {
-        pyodide.runPython(`convertImage()`);
+        Pyodide.runPython(`convertImage()`);
     }
     </script>
 
