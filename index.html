@@ -4,20 +4,21 @@
         <meta charset="UTF-8">
         <title>WebP to JPEG Converter</title>
         <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-    
+
         <!-- Load Pyodide -->
         <script type="text/javascript" src="https://cdn.jsdelivr.net/pyodide/v0.23.2/full/pyodide.js"></script>
+        <script type="text/javascript">
             window.addEventListener('load', async function() {
                 // Ensure Pyodide is fully loaded
                 await loadPyodide({
                     indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.2/full/"
                 });
                 console.log("Pyodide loaded successfully.");
-    
+
                 // Then load the Pillow package
                 await pyodide.loadPackage(['pillow']);
                 console.log("Pillow loaded successfully.");
-    
+
                 // Finally, load PyScript
                 var pyscript = document.createElement('script');
                 pyscript.src = 'https://pyscript.net/latest/pyscript.js';
@@ -25,43 +26,42 @@
             });
         </script>
     </head>       
-    
-<body>
+    <body>
 
-<h1>WebP to JPEG Converter</h1>
+    <h1>WebP to JPEG Converter</h1>
 
-<input type="file" id="upload-file" accept=".webp" onchange="convertImage()">
-<button id="convert-button">Convert to JPEG</button>
+    <input type="file" id="upload-file" accept=".webp" onchange="convertImage()">
+    <button id="convert-button">Convert to JPEG</button>
 
-<img id="output-image" style="display:none; max-width: 300px;" alt="Converted Image">
+    <img id="output-image" style="display:none; max-width: 300px;" alt="Converted Image">
 
-<py-script>
-from js import document
-from PIL import Image
-from io import BytesIO
-import base64
-import asyncio
+    <py-script>
+    from js import document
+    from PIL import Image
+    from io import BytesIO
+    import base64
+    import asyncio
 
-async def convert_to_jpeg(file):
-    webp_image = Image.open(BytesIO(await file.arrayBuffer().to_py()))
-    jpeg_bytes = BytesIO()
-    webp_image.save(jpeg_bytes, format="JPEG")
-    jpeg_base64 = base64.b64encode(jpeg_bytes.getvalue()).decode('utf-8')
-    document.getElementById("output-image").src = f"data:image/jpeg;base64,{jpeg_base64}"
-    document.getElementById("output-image").style.display = "block"
+    async def convert_to_jpeg(file):
+        webp_image = Image.open(BytesIO(await file.arrayBuffer().to_py()))
+        jpeg_bytes = BytesIO()
+        webp_image.save(jpeg_bytes, format="JPEG")
+        jpeg_base64 = base64.b64encode(jpeg_bytes.getvalue()).decode('utf-8')
+        document.getElementById("output-image").src = f"data:image/jpeg;base64,{jpeg_base64}"
+        document.getElementById("output-image").style.display = "block"
 
-def convertImage():
-    file_input = document.getElementById("upload-file")
-    if file_input.files.length > 0:
-        file = file_input.files[0]
-        asyncio.create_task(convert_to_jpeg(file))
-</py-script>
+    def convertImage():
+        file_input = document.getElementById("upload-file")
+        if file_input.files.length > 0:
+            file = file_input.files[0]
+            asyncio.create_task(convert_to_jpeg(file))
+    </py-script>
 
-<script>
-function convertImage() {
-    pyodide.runPython(`convertImage()`);
-}
-</script>
+    <script>
+    function convertImage() {
+        pyodide.runPython(`convertImage()`);
+    }
+    </script>
 
-</body>
+    </body>
 </html>
