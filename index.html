@@ -32,7 +32,7 @@
         from io import BytesIO
         import base64
         import asyncio
-
+        
         async def convert_to_jpeg(file):
             webp_image = Image.open(BytesIO(await file.arrayBuffer().to_py()))
             jpeg_bytes = BytesIO()
@@ -40,14 +40,14 @@
             jpeg_base64 = base64.b64encode(jpeg_bytes.getvalue()).decode('utf-8')
             document.getElementById("output-image").src = f"data:image/jpeg;base64,{jpeg_base64}"
             document.getElementById("output-image").style.display = "block"
-
-        def convertImage():
+        
+        def convert_image():  # Note the function name change for clarity
             file_input = document.getElementById("upload-file")
             if file_input.files.length > 0:
                 file = file_input.files[0]
                 asyncio.create_task(convert_to_jpeg(file))
-    </py-script>
-
+        </py-script>
+        
     <script>
         function convertImage() {
             window.pyodide.runPython('convertImage()');
