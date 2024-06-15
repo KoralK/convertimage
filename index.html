@@ -5,24 +5,26 @@
         <title>WebP to JPEG Converter</title>
         <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
     
+        <!-- Load Pyodide -->
         <script type="text/javascript" src="https://cdn.jsdelivr.net/pyodide/v0.23.2/full/pyodide.js"></script>
-        <script type="text/javascript">
-            async function loadDependenciesAndStartPyScript() {
+            window.addEventListener('load', async function() {
+                // Ensure Pyodide is fully loaded
                 await loadPyodide({
                     indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.2/full/"
                 });
                 console.log("Pyodide loaded successfully.");
     
+                // Then load the Pillow package
                 await pyodide.loadPackage(['pillow']);
                 console.log("Pillow loaded successfully.");
     
+                // Finally, load PyScript
                 var pyscript = document.createElement('script');
                 pyscript.src = 'https://pyscript.net/latest/pyscript.js';
                 document.head.appendChild(pyscript);
-            }
-            window.addEventListener('load', loadDependenciesAndStartPyScript);
+            });
         </script>
-    </head>    
+    </head>       
     
 <body>
 
